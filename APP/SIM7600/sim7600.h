@@ -35,7 +35,7 @@ extern u8 SIM7600_CSQ[3];
 extern u8 GSM_Dect(void);
 extern u8 SIM7600_CONNECT_SERVER_SEND_INFOR(u8 *IP_ADD,u8 *COM);
 extern u8 SIM7600_GPRS_SEND_DATA(u8 *temp_data);
-u8 SIM7600_CONNECT_SERVER();
+u8 SIM7600_CONNECT_SERVER(void);
 void SIM7600_Init(void);	//ADD By Yao
 void SIM7600_Reset(void);	//ADD By Yao
 #endif

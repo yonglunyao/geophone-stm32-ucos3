@@ -1,10 +1,14 @@
 #include "includes.h"
 #include "sim7600.h"
+#include "includes.h"
 #include "usart.h"		
 #include "SysTick.h"	 
 #include "string.h" 
 #include "math.h"
 #include "stdio.h"
+#include "oled.h"
+#include "system.h"
+#include "malloc.h"
 
 //********************************************************************************
 //无
@@ -94,12 +98,16 @@ u8* sim7600_check_cmd(u8 *str)
 //       1,发送失败
 u8 sim7600_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 {
+	OS_ERR err; 
+	extern OS_MUTEX SIM_Busy_mutex;
 	u8 res=0; 
 	USART2_RX_STA=0;
 	USART2_RX_REC_ATCOMMAD=1;
+	OSMutexPend(&SIM_Busy_mutex,0,OS_OPT_PEND_BLOCKING,0,&err); //等待sdmutex信号量
 	if((u32)cmd<=0XFF)
 	{
-		while ( DMA_GetFlagStatus(DMA1_Stream6, DMA_FLAG_TCIF6) == RESET);	//等待通道7传输完成   
+//		while ( DMA_GetFlagStatus(DMA1_Stream6, DMA_FLAG_TCIF6) == RESET);	//等待通道7传输完成   
+		while ( USART_GetITStatus(USART2, USART_IT_RXNE) != RESET);	
 		USART2->DR=(u32)cmd;
 	}
 	else 
@@ -108,7 +116,8 @@ u8 sim7600_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 	{
 		while(--waittime)	//等待倒计时
 		{
-			delay_ms(10);
+			OSTimeDlyHMSM(0,0,0,20,OS_OPT_TIME_HMSM_STRICT,&err);//延时
+//			delay_ms(20);
 			if(USART2_RX_STA&0X8000)//接收到期待的应答结果
 			{
 				if(sim7600_check_cmd(ack))break;//得到有效数据 
@@ -119,6 +128,7 @@ u8 sim7600_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 	}
 	USART2_RX_STA=0;
 	USART2_RX_REC_ATCOMMAD=0;
+	OSMutexPost(&SIM_Busy_mutex,OS_OPT_POST_FIFO,&err); //等待sdmutex信号量
 	return res;
 } 
 
@@ -150,6 +160,7 @@ u8 sim7600_work_test(void)
 	return SIM_OK;
 }
 
+u8 GSM_Dec_Times=0;
 u8 GSM_Dect(void)
 {
 	u8 res;
@@ -158,30 +169,58 @@ u8 GSM_Dect(void)
 	{
 		case SIM_OK:
 			printf("GSM模块自检成功\r\n");
+#if OLED_ENABLE
+			OLED_ShowString(0,3,(u8*)"     4G OK      ");
+#endif
+//检测超过次数单片机复位 Add By Yao
+			GSM_Dec_Times++;
+			if(GSM_Dec_Times>10)
+			{
+				printf("4G连接失败，准备重启...\r\n\r\n");
+#if OLED_ENABLE
+				OLED_ShowString(0,3,(u8*)" 4G failure,RST ");
+#endif
+				delay_ms(2000);
+				soft_reset();
+			}
 			break;
 		case SIM_COMMUNTION_ERR:
 			printf("与GSM模块未通讯成功，请等待\r\n");
+#if OLED_ENABLE
+			OLED_ShowString(0,3,(u8*)"Connecting to 4G");
+#endif
 			break;
 		case SIM_CPIN_ERR:
 			printf("没检测到SIM卡\r\n");
+#if OLED_ENABLE
+			OLED_ShowString(0,3,(u8*)"  No SIM card   ");
+#endif
 			break;
 		case SIM_CREG_FAIL:
-			printf("注册网络中。。。\r\n");
+			printf("注册网络中...\r\n");
 			printf("当前信号值：%s\r\n",SIM900_CSQ);
+#if OLED_ENABLE
+			OLED_ShowString(0,3,(u8*)"  Networking... ");
+#endif
 		default:
 			break;
 	}
 	return res;
 }
+//连接到FTP服务器
 u8 SIM7600_CONNECT_SERVER()
 {		
-	if(sim7600_send_cmd((u8 *)"AT+CGSOCKCONT=1,\"IP\",\"3GNET\"",(u8 *)"OK",200))	return 1;
-	if(sim7600_send_cmd((u8 *)"AT+CSOCKSETPN=1",(u8 *)"OK",600))	return 2;
-	//if(sim7600_send_cmd((u8 *)"AT+CIPMODE=0",(u8 *)"OK",1000))	return 3;
-	if(sim7600_send_cmd((u8 *)"AT+NETOPEN",(u8 *)"+NETOPEN: 0",1000))	   
+	extern u8 GSM_Dec_Times;
+	if(sim7600_send_cmd((u8 *)"AT+NETOPEN?",(u8 *)"+NETOPEN: 1",200))//检查网络是否打开
 	{
-		sim7600_send_cmd((u8 *)"AT+NETCLOSE",(u8 *)"+NETCLOSE: 0",1000);  
-		return 4;
+		if(sim7600_send_cmd((u8 *)"AT+CGSOCKCONT=1,\"IP\",\"CTNET\"",(u8 *)"OK",200))	return 1;
+		if(sim7600_send_cmd((u8 *)"AT+CSOCKSETPN=1",(u8 *)"OK",600))	return 2;
+		//if(sim7600_send_cmd((u8 *)"AT+CIPMODE=0",(u8 *)"OK",1000))	return 3;
+		if(sim7600_send_cmd((u8 *)"AT+NETOPEN",(u8 *)"+NETOPEN: 0",1000))	   
+		{
+			sim7600_send_cmd((u8 *)"AT+NETCLOSE",(u8 *)"+NETCLOSE: 0",1000);  
+			return 4;
+		}
 	}
 	if(sim7600_send_cmd((u8 *)"AT+IPADDR",(u8 *)"OK",500))	return 5;
 	if(sim7600_send_cmd((u8 *)"AT+CFTPSERV=\"111.231.145.217\"",(u8 *)"OK",500))	return 6;	  
@@ -189,6 +228,7 @@ u8 SIM7600_CONNECT_SERVER()
 	if(sim7600_send_cmd((u8 *)"AT+CFTPMODE=1",(u8 *)"OK",500))	return 8;	 
 	if(sim7600_send_cmd((u8 *)"AT+CFTPTYPE=I",(u8 *)"OK",500))	return 9;	 
 	if(sim7600_send_cmd((u8 *)"AT+CFTPUN=\"ftpu\"",(u8 *)"OK",500))	return 10;	 
-	if(sim7600_send_cmd((u8 *)"AT+CFTPPW=\"wsn123\"",(u8 *)"OK",500))	return 11;	 
+	if(sim7600_send_cmd((u8 *)"AT+CFTPPW=\"wsn123\"",(u8 *)"OK",500))	return 11;	
+	GSM_Dec_Times=0;	//成功连接服务器，清除GSM检测次数，防止超出复位
 	return 0;
 }	

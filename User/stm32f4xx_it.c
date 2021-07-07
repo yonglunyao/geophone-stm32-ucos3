@@ -29,6 +29,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
+#include "system.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -63,7 +64,8 @@ void HardFault_Handler(void)
 {
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
-  {
+  {	
+		soft_reset();
   }
 }
 
@@ -129,21 +131,22 @@ void DebugMon_Handler(void)
   * @param  None
   * @retval None
   */
-void PendSV_Handler(void)
-{
-}
+//void PendSV_Handler(void)
+//{
+//}
 
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
   * @retval None
   */
-/*
-void SysTick_Handler(void)
-{
-
-}
-*/
+//#include "os.h"
+//void SysTick_Handler(void)
+//{
+//  OSIntEnter();                  //进入中断
+//  OSTimeTick();                 //调用ucos的时钟服务程序
+//  OSIntExit();                  //触发任务切换软中断
+//}
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

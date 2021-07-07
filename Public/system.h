@@ -60,6 +60,6 @@
 #define PIout(n)   BIT_ADDR(GPIOI_ODR_Addr,n)  // ‰≥ˆ 
 #define PIin(n)    BIT_ADDR(GPIOI_IDR_Addr,n)  // ‰»Î
 
-
+void soft_reset(void);
 
 #endif

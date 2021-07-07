@@ -10,12 +10,13 @@
       <TargetName>Target 1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pCCUsed>5060300::V5.06 update 3 (build 300)::ARMCC</pCCUsed>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407ZG</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.15.0</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
+          <PackID>Keil.STM32F4xx_DFP.1.0.8</PackID>
+          <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -321,7 +322,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -334,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\User;.\Libraries\CMSIS;.\Libraries\STM32F4xx_StdPeriph_Driver\inc;.\Malloc;.\APP\flash;.\APP\CH376;.\FATFS\;.\FATFS\FATFS_APP;.\APP\sd;.\APP\exti;.\APP\time;.\APP\SIM7600;.\APP\iic;.\APP\spi;.\APP\GPS;.\APP\iwdg;.\Public;.\APP\ADS1256;.\APP\dma;.\APP\exti;.\APP\time;.\APP\pwm;.\UCOSIII\uC-BSP;.\UCOSIII\uC-CONFIG;.\UCOSIII\uC-CPU;.\UCOSIII\uC-LIB;.\UCOSIII\uCOS-III;.\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;.\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;.\UCOSIII\uCOS-III\Source;.\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView</IncludePath>
+              <IncludePath>.\User;.\Libraries\CMSIS;.\Libraries\STM32F4xx_StdPeriph_Driver\inc;.\Malloc;.\APP\flash;.\APP\CH376;.\FATFS\;.\FATFS\FATFS_APP;.\APP\sd;.\APP\exti;.\APP\time;.\APP\SIM7600;.\APP\iic;.\APP\spi;.\APP\GPS;.\APP\iwdg;.\Public;.\APP\OLED;.\APP\ADS1256;.\APP\dma;.\APP\exti;.\APP\time;.\APP\pwm;.\UCOSIII\uC-BSP;.\UCOSIII\uC-CONFIG;.\UCOSIII\uC-CPU;.\UCOSIII\uC-LIB;.\UCOSIII\uCOS-III;.\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;.\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;.\UCOSIII\uCOS-III\Source;.\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;.\APP\STMFLASH;.\APP\socket;.\APP\http</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -473,6 +474,11 @@
               <FileType>1</FileType>
               <FilePath>.\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_sdio.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -564,14 +570,24 @@
               <FilePath>.\APP\ADS1256\bsp_ads1256.c</FilePath>
             </File>
             <File>
-              <FileName>CH376.C</FileName>
+              <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\APP\CH376\CH376.C</FilePath>
+              <FilePath>.\APP\OLED\oled.c</FilePath>
             </File>
             <File>
-              <FileName>FILE_SYS.C</FileName>
+              <FileName>stmflash.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\APP\CH376\FILE_SYS.C</FilePath>
+              <FilePath>.\APP\STMFLASH\stmflash.c</FilePath>
+            </File>
+            <File>
+              <FileName>socket.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\APP\socket\socket.c</FilePath>
+            </File>
+            <File>
+              <FileName>http.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\APP\http\http.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -792,6 +808,26 @@
               <FileName>os_cfg_app.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\UCOSIII\uC-CONFIG\os_cfg_app.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>CH376</GroupName>
+          <Files>
+            <File>
+              <FileName>FILE_SYS.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\APP\CH376\FILE_SYS.C</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_BASE.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\APP\CH376\HAL_BASE.C</FilePath>
+            </File>
+            <File>
+              <FileName>UART_HW.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\APP\CH376\UART_HW.C</FilePath>
             </File>
           </Files>
         </Group>

@@ -149,6 +149,13 @@ typedef struct
 	u8 ScanMode;			/* 扫描模式，0表示单端8路， 1表示差分4路 */
 }ADS1256_VAR_T;
 
+typedef struct
+{
+	u32 Ach0;
+	u32 Ach1;
+	u32 Ach2;
+}Correct_Array;
+
 void bsp_InitADS1256(void);
 void ADS1256_CfgADC(u8 device, ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate);
 

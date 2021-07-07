@@ -1,13 +1,9 @@
-/****************************** (C) COPYRIGHT 2011 YQDZ **************************
-* 文  件  名      : CH376INC.H
-* 作      者      : 亿全电子
-*                   FAE现场应用工程师 QQ:1027413631
-*                   7*24小时技术支持电话:15366066738
-*                   http://shop57138657.taobao.com/
-* 版      本      : V1.0
-* 日      期      : 2011/08/29
-* 描      述      : CH376芯片命令相关定义.
-*********************************************************************************/
+/* C Define for CH376        */
+/* Website:  http://wch.cn   */
+/* Email:    tech@wch.cn     */
+/* Author:   W.ch 2008.10    */
+/* V1.0 for CH376            */
+
 #ifndef __CH376INC_H__
 #define __CH376INC_H__
 
@@ -54,7 +50,7 @@ typedef unsigned char volatile      *PUINT8V;
 /* ********************************************************************************************************************* */
 /* 硬件特性 */
 
-#define		CH376_DAT_BLOCK_LEN		0x40	/* USB单个数据包, 数据块的最大长度, 默认缓冲区的长度 */
+#define	CH376_DAT_BLOCK_LEN	0x40			/* USB单个数据包, 数据块的最大长度, 默认缓冲区的长度 */
 
 /* ********************************************************************************************************************* */
 /* 命令代码 */
@@ -104,10 +100,11 @@ typedef unsigned char volatile      *PUINT8V;
 /* 输入: 数据68H, 当前文件长度(总长度32位,低字节在前) */
 
 #define	CMD11_SET_USB_MODE	0x15			/* 设置USB工作模式 */
-//00H=未启用的设备方式, 01H=已启用的设备方式并且使用外部固件模式(串口不支持), 
-//02H=已启用的设备方式并且使用内置固件模式 03H=SD卡主机模式/未启用的主机模式,用于管理和存取SD卡中的文件 
-//04H=未启用的主机方式, 05H=已启用的主机方式, 06H=已启用的主机方式并且自动产生SOF包, 07H=已启用的主机方式并且复位USB总线 */
-//输出: 操作状态( CMD_RET_SUCCESS或CMD_RET_ABORT, 其它值说明操作未完成 ) 
+/* 输入: 模式代码 */
+/*       00H=未启用的设备方式, 01H=已启用的设备方式并且使用外部固件模式(串口不支持), 02H=已启用的设备方式并且使用内置固件模式 */
+/*       03H=SD卡主机模式/未启用的主机模式,用于管理和存取SD卡中的文件 */
+/*       04H=未启用的主机方式, 05H=已启用的主机方式, 06H=已启用的主机方式并且自动产生SOF包, 07H=已启用的主机方式并且复位USB总线 */
+/* 输出: 操作状态( CMD_RET_SUCCESS或CMD_RET_ABORT, 其它值说明操作未完成 ) */
 
 #define	CMD01_GET_STATUS	0x22			/* 获取中断状态并取消中断请求 */
 /* 输出: 中断状态 */
@@ -167,14 +164,14 @@ typedef unsigned char volatile      *PUINT8V;
 /*           索引号范围为00H~0FH, 索引号0FFH则为当前已经打开的文件 */
 /* 输出中断 */
 
-#define	CMD0H_DIR_INFO_SAVE	0x38			                                            /* 主机文件模式: 保存文件的目录信息 */
+#define	CMD0H_DIR_INFO_SAVE	0x38			/* 主机文件模式: 保存文件的目录信息 */
 /* 输出中断 */
 
-#define	CMD4H_BYTE_LOCATE	0x39			                                            /* 主机文件模式: 以字节为单位移动当前文件指针 */
+#define	CMD4H_BYTE_LOCATE	0x39			/* 主机文件模式: 以字节为单位移动当前文件指针 */
 /* 输入: 偏移字节数(总长度32位,低字节在前) */
 /* 输出中断 */
 
-#define	CMD2H_BYTE_READ		0x3A			                                            /* 主机文件模式: 以字节为单位从当前位置读取数据块 */
+#define	CMD2H_BYTE_READ		0x3A			/* 主机文件模式: 以字节为单位从当前位置读取数据块 */
 /* 输入: 请求读取的字节数(总长度16位,低字节在前) */
 /* 输出中断 */
 
@@ -251,7 +248,7 @@ typedef unsigned char volatile      *PUINT8V;
 
 #define	CMD20_SET_RETRY		0x0B			/* 主机方式: 设置USB事务操作的重试次数 */
 /* 输入: 数据25H, 重试次数 */
-/*       位7为0则收到NAK时不重试, 位7为1位6为0则收到NAK时无限重试, 位7为1位6为1则收到NAK时最多重试3秒, 位5~位0为超时后的重试次数 */
+/*           位7为0则收到NAK时不重试, 位7为1位6为0则收到NAK时无限重试, 位7为1位6为1则收到NAK时最多重试3秒, 位5~位0为超时后的重试次数 */
 
 #define	CMD20_WRITE_VAR8	0x0B			/* 设置指定的8位文件系统变量 */
 /* 输入: 变量地址, 数据 */
@@ -485,7 +482,7 @@ typedef unsigned char volatile      *PUINT8V;
 
 #ifndef	CMD_RET_SUCCESS
 #define	CMD_RET_SUCCESS		0x51			/* 命令操作成功 */
-#define	CMD_RET_ABORT		  0x5F			/* 命令操作失败 */
+#define	CMD_RET_ABORT		0x5F			/* 命令操作失败 */
 #endif
 
 /* ********************************************************************************************************************* */
@@ -495,7 +492,7 @@ typedef unsigned char volatile      *PUINT8V;
 
 /* 以下状态代码为特殊事件中断, 如果通过CMD20_CHK_SUSPEND启用USB总线挂起检查, 那么必须处理USB总线挂起和睡眠唤醒的中断状态 */
 #define	USB_INT_USB_SUSPEND	0x05			/* USB总线挂起事件 */
-#define	USB_INT_WAKE_UP		  0x06			/* 从睡眠中被唤醒事件 */
+#define	USB_INT_WAKE_UP		0x06			/* 从睡眠中被唤醒事件 */
 
 /* 以下状态代码0XH用于USB设备方式 */
 /*   内置固件模式下只需要处理: USB_INT_EP1_OUT, USB_INT_EP1_IN, USB_INT_EP2_OUT, USB_INT_EP2_IN */
@@ -584,8 +581,8 @@ typedef unsigned char volatile      *PUINT8V;
 
 #ifndef	DEF_WILDCARD_CHAR
 #define	DEF_WILDCARD_CHAR	0x2A			/* 路径名的通配符 '*' */
-#define	DEF_SEPAR_CHAR1		0x5C		/* 路径名的分隔符 '\' */
-#define	DEF_SEPAR_CHAR2		0x2F		/* 路径名的分隔符 '/' */
+#define	DEF_SEPAR_CHAR1		0x5C			/* 路径名的分隔符 '\' */
+#define	DEF_SEPAR_CHAR2		0x2F			/* 路径名的分隔符 '/' */
 #define	DEF_FILE_YEAR		2004			/* 默认文件日期: 2004年 */
 #define	DEF_FILE_MONTH		1				/* 默认文件日期: 1月 */
 #define	DEF_FILE_DATE		1				/* 默认文件日期: 1日 */
@@ -827,7 +824,7 @@ typedef union _CH376_CMD_DATA {
 /*           位2, 当前缓冲区中的FAT表数据是否被修改标志, 0-未修改, 1-已修改 */
 /*           位3, 文件长度需要修改标志, 当前文件被追加数据, 0-未追加无需修改, 1-已追加需要修改 */
 /*           其它位, 保留,请勿修改 */
-#define	VAR_DISK_STATUS		0x2B	   /* 主机文件模式下的磁盘及文件状态 */
+#define	VAR_DISK_STATUS		0x2B			/* 主机文件模式下的磁盘及文件状态 */
 #define	VAR_SD_BIT_FLAG		0x30			/* 主机文件模式下SD卡的位标志 */
 /*           位0, SD卡版本, 0-只支持SD第一版,1-支持SD第二版 */
 /*           位1, 自动识别, 0-SD卡, 1-MMC卡 */
@@ -906,11 +903,10 @@ typedef union _CH376_CMD_DATA {
 #define	DEF_USB_SYNC_FRAME	0x0C
 #endif
 
-/* *************************************************************************** */
+/* ********************************************************************************************************************* */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/************************************ End *************************************/

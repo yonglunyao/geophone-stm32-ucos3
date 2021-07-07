@@ -438,7 +438,7 @@ void USART6_Init(u32 bound)
 	GPIO_PinAFConfig(GPIOG,GPIO_PinSource14,GPIO_AF_USART6); //GPIOG14复用为USART6
 	
 	//USART6端口配置
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_14 ; //GPIOG9与GPIOG14
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_14 ; //GPIOG9与GPIOG14 PG9:U6_RX,PG14:U6_TX
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//复用功能
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;	//速度50MHz
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽复用输出

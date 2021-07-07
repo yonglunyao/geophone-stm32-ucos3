@@ -17,6 +17,8 @@
 #include "spi.h"
 #include "dma.h"
 
+
+
 #define HARD_SPI	1	/* 定义此行表示使用GPIO模拟SPI接口 */
 
 /*
@@ -293,7 +295,7 @@ void ADS1256_CfgADC(u8 device, ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 
 			ACAL=1使能自校准功能。当 PGA，BUFEEN, DRATE改变时会启动自校准
 		*/
-		buf[0] = (0 << 3) | (1 << 2) | (1 << 1);
+		buf[0] = (0 << 3) | (0 << 2) | (1 << 1);
 		//ADS1256_WriteReg(REG_STATUS, (0 << 3) | (1 << 2) | (1 << 1));
 
 		buf[1] = 0x08;	/* 高四位0表示AINP接 AIN0,  低四位8表示 AINN 固定接 AINCOM */
@@ -617,11 +619,11 @@ u8 ADS1256_ReadChipID(u8 device)
 
 	ADS1256_WaitDRDY(device);
 	id = ADS1256_ReadReg(device, REG_DRATE);
-	printf("drate:%02x\r\n", id);
+//	printf("drate:%02x\r\n", id);	//Edit By Yao
 	
 	ADS1256_WaitDRDY(device);
 	id = ADS1256_ReadReg(device, REG_STATUS);
-	printf("reg:%02x\r\n", id);
+//	printf("reg:%02x\r\n", id);	//Edit By Yao
 	
 	return (id >> 4);
 }
@@ -849,10 +851,10 @@ void ADS1256_StartScan(u8 _ucScanMode)
 	/* Enable AFIO clock */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
-	/* Connect EXTI3 Line to PA2 pin */
+	/* Connect EXTI2 Line to PA2 pin */
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource2);
 
-	/* Configure EXTI3 line */
+	/* Configure EXTI2 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line2;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  /* 下降沿 */
@@ -961,15 +963,13 @@ void ADS1256_ISR(void)
 
 /*
 *********************************************************************************************************
-*	函 数 名: EXTI3_IRQHandler
-*	功能说明: 外部中断服务程序.
+*	函 数 名: EXTI2_IRQHandler
+*	功能说明: DRDY0中断服务程序.
 *	形    参：无
 *	返 回 值: 无
 *********************************************************************************************************
 */
 #include "time.h"
-
-
 
 void EXTI2_IRQHandler(void)
 {
@@ -982,6 +982,10 @@ void EXTI2_IRQHandler(void)
 		//ADS1256_ISR();
 		//printf("%5d: %10d %10d\r\n", excount, ADS1256_GetAdc(0), ADS1256_GetAdc(1));
 		//printf("%ld\r\n",TIM_GetCounter(TIM5));	//TIM_GetCounter(TIM5)
+		
+		//等待另外两个模块数据准备完成，因为不能保证三个AD的数据完美同时到达。解决了周期性脉冲问题 Add By Yao
+		ADS1256_WaitDRDY(1);
+		ADS1256_WaitDRDY(2);
 		++excount;
 		OS_TaskResume((OS_TCB*)&ReadTaskTCB,&err);	//解挂read_task,采集一次
 		
